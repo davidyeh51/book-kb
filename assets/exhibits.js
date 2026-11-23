@@ -118,7 +118,9 @@
         // 頂端節點的說明放右側，避免超出畫布
         const top = Math.sin(a) < -0.9, right = top || Math.cos(a) > 0.3, left = !top && Math.cos(a) < -0.3;
         const tx = right ? x + 54 : left ? x - 54 : x, ty = top ? y : Math.sin(a) < -0.5 ? y - 64 : Math.sin(a) > 0.5 ? y + 64 : y;
-        b += T(tx, ty, s.d, { size: 13, n: 9, fill: C.ink2, anchor: right ? 'start' : left ? 'end' : 'middle', valign: 'middle', max: 3 });
+        // 說明文字寬度依可用空間調整，避免超出畫布
+        const room = right ? W - tx - 4 : left ? tx - 4 : 150;
+        b += T(tx, ty, s.d, { size: 13, n: Math.max(3, Math.min(9, room / 13)), fill: C.ink2, anchor: right ? 'start' : left ? 'end' : 'middle', valign: 'middle', max: 4 });
       }
     });
     return svg(W, H, b);
@@ -191,7 +193,9 @@
       b += `<rect x="${x}" y="60" width="${bw}" height="150" fill="${last ? C.accent : C.soft}" stroke="${last ? C.accent : C.line}"/>`;
       b += T(x + bw / 2, 135, s.h, { size: 22, n: (bw - 20) / 22, weight: 700, anchor: 'middle', valign: 'middle', fill: last ? C.white : C.ink, serif: 1, max: 2 });
       b += T(x + bw / 2, 250, s.d, { size: 14, n: (bw - 8) / 14, anchor: 'middle', fill: C.ink2, max: 6 });
-      if (!last) b += `<text x="${x + bw + op / 2}" y="135" font-size="30" font-weight="700" fill="${C.gray}" text-anchor="middle" dominant-baseline="central">${i === n - 2 ? '＝' : '＋'}</text>`;
+      // ops 可自訂運算符號（如 ['－','＝']、['÷','＝']），未給時預設 ＋…＝
+      const sym = (e.ops && e.ops[i]) || (i === n - 2 ? '＝' : '＋');
+      if (!last) b += `<text x="${x + bw + op / 2}" y="135" font-size="30" font-weight="700" fill="${C.gray}" text-anchor="middle" dominant-baseline="central">${esc(sym)}</text>`;
     });
     return svg(W, H, b);
   }
